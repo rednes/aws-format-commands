@@ -12,6 +12,22 @@ do
         aws ec2 stop-instances --instance-ids $instance --output text --region $region
     done
 
+    # 自分の所有する全てのスナップショットを取得して全部DELETEする
+    echo "  [Snapshot]"
+    for snapshot in $(aws ec2 describe-snapshots --owner-ids self --query "Snapshots[].SnapshotId" --output text --region $region)
+    do
+        echo "    Delete:$snapshot"
+        aws ec2 delete-snapshot --snapshot-id $snapshot --output text --region $region
+    done
+
+    # 自分の所有する全てのAMIを取得して全部DEREGISTERする
+    echo "  [AMI]"
+    for image in $(aws ec2 describe-images --owners self --query "Images[].ImageId" --output text --region $region)
+    do
+        echo "    Deregister:$image"
+        aws ec2 deregister-image --image-id $image --output text --region $region
+    done
+    
     # 全てのELB LoadBalancerArnを取得して全部DELETEする
     echo "  [ELB]"
     for lba in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output text --region $region)
