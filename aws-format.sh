@@ -4,7 +4,6 @@
 echo "[S3]"
 for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text)
 do
-    echo "  Remove:$bucket"
     aws s3 rb s3://$bucket --force
 done   
 
