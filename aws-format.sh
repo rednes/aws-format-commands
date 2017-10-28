@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# 全てのS3バケットを取得して全部DELETEする
+echo "[S3]"
+for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text)
+do
+    echo "  Remove:$bucket"
+    aws s3 rb s3://$bucket --force
+done   
+
 # EC2用Regionを取得してRegion毎に実行する
 for region in $(aws ec2 describe-regions --query "Regions[].RegionName" --output text)
 do
