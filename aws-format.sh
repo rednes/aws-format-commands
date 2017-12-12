@@ -35,6 +35,20 @@ do
         aws ec2 deregister-image --image-id $image --output text --region $region
     done
     
+    echo "  [EIP]"
+    # 全てのElastic IPを取得して全部関連づけを外す
+    for association in $(aws ec2 describe-addresses --query "Addresses[].AssociationId" --output text --region $region)
+    do
+        echo "    Disassociate:$association"
+        aws ec2 disassociate-address --association-id $association --region $region
+    done
+    # 全てのElastic IPを取得して全部RELEASEする
+    for allocation in $(aws ec2 describe-addresses --query "Addresses[].AllocationId" --output text --region $region)
+    do
+        echo "    Release:$allocation"
+        aws ec2 release-address --allocation-id $allocation --region $region
+    done
+
     # 全てのELB LoadBalancerArnを取得して全部DELETEする
     echo "  [ELB]"
     for lba in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output text --region $region)
